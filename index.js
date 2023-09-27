@@ -1,7 +1,11 @@
 import express from'express'
+import { InitiateApp } from './src/utlis/initiateApp.js'
+import {config} from'dotenv'
+import path from 'path'
+config({ path: path.resolve('./config/config.env') })
 
-const app=express()
-const Port =3000
-app.listen(Port,()=>{
-    console.log(`---------------Server is running on port Number ${Port}!----------------------`)
-})
+
+
+const App=express()
+InitiateApp(App,express)
+
