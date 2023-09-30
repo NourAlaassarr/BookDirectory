@@ -9,8 +9,9 @@ router.post('/SignUp',asyncHandler(AuthControllers.SignUp))
 router.get('/confirm/:Token',asyncHandler(AuthControllers.ConfirmEmail))
 router.post('/SignIn',asyncHandler(AuthControllers.SignIn))
 router.put('/Update',isAuth(),asyncHandler(AuthControllers.Update))
-
-
+router.patch('/UpdatePassword',isAuth(),asyncHandler(AuthControllers.UpdatePassword))
+router.get('/GetProfile',isAuth(),asyncHandler(AuthControllers.GetProfile))
+router.patch('/SoftDelete',isAuth(),asyncHandler(AuthControllers.SoftDelete))
 
 
 

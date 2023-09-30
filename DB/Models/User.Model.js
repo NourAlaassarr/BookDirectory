@@ -76,6 +76,12 @@ const UserSchema = new Schema({
         type:Boolean,
         default:false,
     },
+    updatedAt:{
+        type:Date
+    },
+    ChangePassAt:{
+        type:Date
+    },
     
     BookShelf:[
         {

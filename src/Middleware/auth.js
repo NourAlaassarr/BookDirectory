@@ -15,7 +15,7 @@ export const isAuth = () => {
                 if (!DecodedData || !DecodedData._id) {
                     return res.status(400).json({ Message: 'error invalid token!' })
                 }
-                const User = await UserModel.findById(DecodedData._id, 'Email UserName role')
+                const User = await UserModel.findById(DecodedData._id, 'Email UserName Password role')
                 if (!User) {
                     return res.status(400).json({ Message: 'Please Sign Up First!' })
                 }
@@ -33,7 +33,8 @@ export const isAuth = () => {
                         payload: {
                             UserName: user.UserName,
                             _id: user._id,
-                            Email: user.Email
+                            Email: user.Email,
+                            password:user.Password
                         },
                         signature: process.env.SIGN_IN_TOKEN_SECRET,
                         expiresIn: '1h'

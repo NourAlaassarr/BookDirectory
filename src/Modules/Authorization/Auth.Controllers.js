@@ -98,7 +98,8 @@ signature:process.env.SIGN_IN_TOKEN_SECRET,
 expiresIn:'1d'})
 const UserUpdate=await UserModel.findOneAndUpdate({EmaiL},{
     token:Token,
-    is_Online:true
+    is_Online:true,
+    isDeleted:false,
 },{
     new:true
 })
@@ -155,6 +156,60 @@ await UserModel.findByIdAndUpdate({_id:UserId},{IsConfirmed:false})
 //Update(Password)
 export const UpdatePassword= async(req,res,next)=>{
     const UserId=req.authUser._id
+    const {OldPassword,NewPassword,ConfirmNewPassword}=req.body
+
+    const User= await UserModel.findById({_id:UserId})
+    if(!User){
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    const PassCheck = pkg.compareSync(OldPassword,User.Password)
+    if(!PassCheck){
+        return next(new Error('Invalid Password', { cause: 400 }))
+    }
+    if(OldPassword==NewPassword){
+        return next(new Error('Please choose a new password', { cause: 400 }))
+    }
+    if (NewPassword != ConfirmNewPassword) {
+        return next(new Error('Password doesn\'t match', { cause: 400 }))
+    }
+
+    const HashPass= pkg.hashSync(NewPassword,+process.env.SALT_ROUNDS)
+    
+    const updatedPass = await UserModel.findOneAndUpdate({_id:UserId},
+        {Password:HashPass,
+        Cpassword:HashPass,
+        ChangePassAt:new Date()},{
+            new:true
+        })
+    
+    // User.Password=NewPassword
+    // User.ConfirmPassword=ConfirmNewPassword
+    // User.save()
+    res.status(200).json({ Message: "Password successfully Changed" })
+}
+
+//Get user profile
+export const GetProfile =async(req,res,next)=>{
+    const UserId=req.authUser._id
+    const User= await UserModel.findById({_id:UserId})
+    if(!User){
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    
+    const UserData=await UserModel.findById({_id:UserId})
+    res.status(200).json({ Message: "Done",UserData })
+
+}
+
+//SoftDelete Profile
+export const SoftDelete = async(req,res,next)=>{
+    const UserId = req.authUser._id
+    const User= await UserModel.findById({_id:UserId})
+    if(!User){
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    const softDelete = await UserModel.findByIdAndUpdate({_id:UserId},{isDeleted:true})
+    res.status(200).json({ Message: "Profile Successfully soft Deleted" })
 
 }
 
@@ -164,8 +219,6 @@ export const UpdatePassword= async(req,res,next)=>{
 
 //Add Profile Picture 
 
-
-//SoftDelete Profile
 
 
 //RefreshToken
