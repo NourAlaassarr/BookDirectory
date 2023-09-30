@@ -1,6 +1,6 @@
 import mongoose, { model,Schema, syncIndexes } from "mongoose";
 import {SystemRoles}from '../../src/utlis/SystemRoles.js'
-
+import pkg from'bcrypt'
 const UserSchema = new Schema({
     UserName:{
         type:String,
@@ -9,7 +9,7 @@ const UserSchema = new Schema({
 
     },
 
-    Emai:{
+    Email:{
         type:String,
         Unique:true,
         required:true,
@@ -45,7 +45,9 @@ const UserSchema = new Schema({
         required:true,
         type:String,
     },
-
+    ChangePassAt:{
+        type:Date
+    },
     IsConfirmed:{
         type:Boolean,
         default:false,
@@ -61,6 +63,33 @@ const UserSchema = new Schema({
         enum:[SystemRoles.User,SystemRoles.Admin,SystemRoles.Super],
         default:SystemRoles.User,
     },
+    token:{
+        type:String
+    },
+    Code:{
+        type:String,
+        default:null
+    },
+    
+    BookShelf:[
+        {
+            BookId:{
+                type:Schema.ObjectId,
+                ref:'Book',
+                required:true,
+            },
+            name:{
+                type:String,
+                required:true,
+            },
+            status:{
+                type: String,
+                enum:['Read' , 'Currently-reading' , 'To-Read'],
+                default:'ToRead'
+            
+        },
+    }
+],
     
     // provider: {
     //     type: String,
@@ -73,5 +102,11 @@ const UserSchema = new Schema({
     timestamps:true,
 })
 
+UserSchema.pre("save",function(next,hash){
+    this.Password=pkg.hashSync(this.Password,process.env.SALT_ROUNDS)
+    this.ConfirmPassword=this.Password
+    next()
+
+})
 
 export const UserModel = model('User',UserSchema)
