@@ -4,7 +4,7 @@ export async function sendmailService({
     
     to,
     subject,
-    html:Message,
+    Message,
     attachments=[]
 
 }={}){
@@ -29,7 +29,7 @@ const Transporter=nodemailer.createTransport({
     const EmailInfo=await Transporter.sendMail({
         from:'"route 👻"<nonaalaassar@gmail.com>',
         to:to?to:'null',
-        subject:subject ? subject : "Hello",
+        subject:subject ? subject :'Hello',
         html:Message ? Message :'',
         attachments,
 

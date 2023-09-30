@@ -2,6 +2,9 @@ import mongoose, { model,Schema, syncIndexes } from "mongoose";
 import {SystemRoles}from '../../src/utlis/SystemRoles.js'
 import pkg from'bcrypt'
 const UserSchema = new Schema({
+    LastName:String,
+    FirstName:String,
+    
     UserName:{
         type:String,
         Unique:true,
@@ -59,7 +62,6 @@ const UserSchema = new Schema({
     },
     role:{
         type:String,
-        lowercase:true,
         enum:[SystemRoles.User,SystemRoles.Admin,SystemRoles.Super],
         default:SystemRoles.User,
     },
@@ -69,6 +71,10 @@ const UserSchema = new Schema({
     Code:{
         type:String,
         default:null
+    },
+    is_Online:{
+        type:Boolean,
+        default:false,
     },
     
     BookShelf:[
@@ -103,7 +109,7 @@ const UserSchema = new Schema({
 })
 
 UserSchema.pre("save",function(next,hash){
-    this.Password=pkg.hashSync(this.Password,process.env.SALT_ROUNDS)
+    this.Password=pkg.hashSync(this.Password,+process.env.SALT_ROUNDS)
     this.ConfirmPassword=this.Password
     next()
 

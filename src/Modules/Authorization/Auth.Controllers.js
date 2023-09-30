@@ -1,5 +1,4 @@
 import {UserModel} from '../../../DB/Models/User.Model.js'
-import pkg from'bcrypt'
 import {GenerateToken,VerifyToken}from '../../utlis/TokenFunction.js'
 import pkg from 'bcrypt'
 import {sendmailService} from '../../Services/SendEmailService.js'
@@ -7,7 +6,7 @@ import {emailTemplate}from'../../utlis/EmailTemplate.js'
 
 //SignUp
 export const SignUp = async(req,res,next)=>{
-    const {Email , PassWord,ConfirmPassword,Gender,Address,Phone,UserName}=req.body
+    const {Email , Password,ConfirmPassword,Gender,Address,Phone,UserName,FirstName,LastName}=req.body
 
     //check for duplication UserName/email
     const EmailCheck= await UserModel.findOne({Emai:Email})
@@ -19,7 +18,7 @@ export const SignUp = async(req,res,next)=>{
         return next (new Error('UserName is Already Exsit', { cause: 400 }))
     }
 //-----------------------------------------------------------------------------
-    if(PassWord!=ConfirmPassword){
+    if(Password!==ConfirmPassword){
         return next (new Error('Password Does\'t Match', { cause: 400 }))
     }
     //HashPassword 
@@ -32,7 +31,7 @@ export const SignUp = async(req,res,next)=>{
         signature:process.env.SIGNATURE_CONFIRMATION_EMAIL,
         expiresIn:'1d'
     })
-const ConfirmationLink=`${req.protocol}://${req.headers.host}/auth/ConfirmEmail`
+const ConfirmationLink=`${req.protocol}://${req.headers.host}/Auth/confirm/${Token}`
 const IsEmailSend = sendmailService({
     to:Email,
     subject:'Confirmation Email',
@@ -50,15 +49,16 @@ if (!IsEmailSend) {
 
 const UserObject =new UserModel({
         Email , 
-        PassWord,
+        Password,
         ConfirmPassword,
         Gender,
         Address,
         Phone,
         UserName,
+        
 
     })
-    const User=UserModel.save(UserObject)
+    const User= await UserObject.save()
     res.status(202).json({Message:'Sign-Up Successfully',User})
 }
 
@@ -80,24 +80,25 @@ export const ConfirmEmail= async(req,res,next)=>{
 
 //Sign in
 export const SignIn=async(req,res,next)=>{
-    const {EmaiL,PassWord}=req.body
+    const {EmaiL,Password}=req.body
     const Usercheck = await UserModel.findOne(EmaiL)
     if(!Usercheck)
     {
         return next (new Error('Invalid Credentials',{cause:400}))
     }
-    const IsPasswordMatch = pkg.compareSync(PassWord, Usercheck.Password)
+    const IsPasswordMatch = pkg.compareSync(Password, Usercheck.Password)
     if (!IsPasswordMatch) {
         return next(new Error('Invalid credentials', { cause: 400 }))
     }
     const Token = GenerateToken({payload:{
-        EmaiL,
+        EmaiL:Usercheck.Email,
         _id:Usercheck._id,
     },
-signature:process.env.SIGNATURE_SIGNIN_EMAIL,
+signature:process.env.SIGN_IN_TOKEN_SECRET,
 expiresIn:'1d'})
-const UserUpdate=await UserModel.findByIdAndUpdate({EmaiL},{
+const UserUpdate=await UserModel.findOneAndUpdate({EmaiL},{
     token:Token,
+    is_Online:true
 },{
     new:true
 })
@@ -105,13 +106,60 @@ res.status(200).json({ Message: "Successfully Logged IN", UserUpdate })
 
 }
 
-//UpdateProfile(email)
+//UpdateProfile(Email,Phone)
+export const Update = async (req,res,next)=>{
+    const {Phone,Email}=req.body
+    const UserId=req.authUser._id
+    const Ifexist = await UserModel.findById({_id:UserId})
+    if(!Ifexist){
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    const checkPhone = await UserModel.findOne({Phone:Phone})
+    if(checkPhone){
+        return next (new Error ('Phone Number Already Exist, Please Choose Another Phone Number',{cause:400}))
+    }
+    //------------------Confirm Email Token------------------------------------------------
+    if(req.body.Email){
+
+    const CheckEmail = await UserModel.findOne({ Email:Email})
+    if(CheckEmail){
+        return next (new Error ('Email ALready exist',{cause:400}))
+    }
+
+    const Token = GenerateToken({
+        payload:{Email},
+        signature:process.env.SIGNATURE_CONFIRMATION_EMAIL,
+        expiresIn:'1d'
+    })
+const ConfirmationLink=`${req.protocol}://${req.headers.host}/Auth/confirm/${Token}`
+const IsEmailSend = sendmailService({
+    to:Email,
+    subject:'Confirmation Email',
+    Message:emailTemplate({
+        link:ConfirmationLink,
+        linkData: 'Click here to Confirm',
+        subject: 'Confirmation Email'
+    })
+})
+if (!IsEmailSend) {
+    return next(new Error('Failed to send Confirmation Email', { cause: 400 }))
+}
+await UserModel.findByIdAndUpdate({_id:UserId},{IsConfirmed:false})
+    }
+
+    const toBeUpdated = await UserModel.findByIdAndUpdate({_id:UserId},{...(Email && {Email}),...(Phone && {Phone})},{new:true})
+    res.status(200).json({ Message: "Updated Successfully",toBeUpdated  })
+    
+}
+
+//Update(Password)
+export const UpdatePassword= async(req,res,next)=>{
+    const UserId=req.authUser._id
+
+}
 
 
-//UpdateProfile(Password)
-
-
-//ForgetPass
+//ForgetPass&Reset
 
 
 //Add Profile Picture 
