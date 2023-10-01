@@ -82,6 +82,8 @@ const UserSchema = new Schema({
     ChangePassAt:{
         type:Date
     },
+    ProfilePicture:String,
+    CoverPicture:[String],
     
     BookShelf:[
         {

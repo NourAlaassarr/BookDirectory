@@ -1,18 +1,47 @@
 import { Router } from "express";
 import { isAuth } from "../../Middleware/auth.js";
-import * as AuthControllers from'./Auth.Controllers.js'
+import * as AuthControllers from './Auth.Controllers.js'
 import { SystemRoles } from "../../utlis/SystemRoles.js";
-import {asyncHandler}from'../../utlis/ErrorHandling.js'
-const router=Router()
+import { asyncHandler } from '../../utlis/ErrorHandling.js'
+import { multerFunction } from '../../Services/MulterLocal.js'
+import { allowedExtensions } from "../../utlis/AllowedExtensions.js";
+const router = Router()
 
-router.post('/SignUp',asyncHandler(AuthControllers.SignUp))
-router.get('/confirm/:Token',asyncHandler(AuthControllers.ConfirmEmail))
-router.post('/SignIn',asyncHandler(AuthControllers.SignIn))
-router.put('/Update',isAuth(),asyncHandler(AuthControllers.Update))
-router.patch('/UpdatePassword',isAuth(),asyncHandler(AuthControllers.UpdatePassword))
-router.get('/GetProfile',isAuth(),asyncHandler(AuthControllers.GetProfile))
-router.patch('/SoftDelete',isAuth(),asyncHandler(AuthControllers.SoftDelete))
+//SignUp
+router.post('/SignUp', asyncHandler(AuthControllers.SignUp))
+
+//ConfirmEmail
+router.patch('/confirm/:Token', asyncHandler(AuthControllers.ConfirmEmail))
+
+//signin
+router.post('/SignIn', asyncHandler(AuthControllers.SignIn))
+
+//Update(email,phone)
+router.put('/Update', isAuth(), asyncHandler(AuthControllers.Update))
+
+//update Password
+router.patch('/UpdatePassword', isAuth(), asyncHandler(AuthControllers.UpdatePassword))
+
+//Get profile data
+router.get('/GetProfile', isAuth(), asyncHandler(AuthControllers.GetProfile))
+
+//soft delete
+router.patch('/SoftDelete', isAuth(), asyncHandler(AuthControllers.SoftDelete))
+
+//Add Profile pictureLocally
+router.post('/AddProfilePicLocally', multerFunction(allowedExtensions.Image, 'User/Profile').single('profile'), asyncHandler(AuthControllers.AddProfilePictureLocally))
+
+//Add Cover PictureLocally
+router.post('/coverLocally',isAuth(),multerFunction(allowedExtensions.Image, 'User/Covers').fields([
+        { name: 'cover', maxCount: 1 },
+        { name: 'image', maxCount: 2 },
+    ]),
+    asyncHandler(AuthControllers.coverPictures),
+)
+
+//Forget Password
 
 
+//Reset Password
 
 export default router

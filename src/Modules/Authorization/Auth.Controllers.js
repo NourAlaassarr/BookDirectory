@@ -218,9 +218,15 @@ export const SoftDelete = async(req,res,next)=>{
 
 
 //Add Profile Picture 
+export const AddProfilePicture=async(req,res,next)=>{
+    const UserId=req.authUser._id
+    if(!req.file){
+        return next (new Error('please upload your profile picture'))
+    }
+    const User = await UserModel.findByIdAndUpdate({_id:UserId},{ProfilePicture:req.file.path},{new:true})
+    res.json({message:'done',User})
 
+}
 
-
-//RefreshToken
 
 
