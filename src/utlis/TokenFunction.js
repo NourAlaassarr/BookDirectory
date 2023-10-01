@@ -21,7 +21,7 @@ export const GenerateToken=({
 export const VerifyToken=({
     token='',
     signature=process.env.SIGNATURE_DEFAULT,
-    expiresIn='1d',
+    
 }={})=>{
     //check payload
     if(!token){

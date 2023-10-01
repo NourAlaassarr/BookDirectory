@@ -28,6 +28,15 @@ router.get('/GetProfile', isAuth(), asyncHandler(AuthControllers.GetProfile))
 //soft delete
 router.patch('/SoftDelete', isAuth(), asyncHandler(AuthControllers.SoftDelete))
 
+//Forget Password
+
+router.patch('/ForgetPassword',asyncHandler(AuthControllers.ForgetPassword))
+
+//Reset Password
+router.patch('/reset/:Token',asyncHandler(AuthControllers.resetPass))
+
+
+
 //Add Profile pictureLocally
 router.post('/AddProfilePicLocally', multerFunction(allowedExtensions.Image, 'User/Profile').single('profile'), asyncHandler(AuthControllers.AddProfilePictureLocally))
 
