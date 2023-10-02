@@ -48,3 +48,15 @@ export const DeleteBook=async(req,res,next)=>{
 
 }
 
+//GetAllBook
+
+export const GetAll=async(req,res,next)=>{
+    const Boosk=await BookModel.find().populate({
+        path:'createdBy',
+        select:"UserName"
+        })
+
+    res.status(202).json({ Message: 'done ', Boosk })
+
+}
+

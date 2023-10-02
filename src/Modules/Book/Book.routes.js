@@ -10,6 +10,6 @@ const router = Router()
 
 router.post('/Add',isAuth(roles.BookApiRoles.ADD_BOOK),asyncHandler(BookControllers.Add_Book))
 router.delete('/Delete',isAuth(roles.BookApiRoles.DELETE_BOOK),asyncHandler(BookControllers.DeleteBook))
-
+router.get('/Get',asyncHandler(BookControllers.GetAll))
 
 export default router
