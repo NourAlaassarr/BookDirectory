@@ -4,6 +4,7 @@ import pkg from 'bcrypt'
 import { sendmailService } from '../../Services/SendEmailService.js'
 import { emailTemplate } from '../../utlis/EmailTemplate.js'
 import { nanoid } from 'nanoid'
+import { SystemRoles } from '../../utlis/SystemRoles.js'
 //SignUp
 export const SignUp = async (req, res, next) => {
     const { Email, Password, ConfirmPassword, Gender, Address, Phone, UserName, FirstName, LastName } = req.body
@@ -99,8 +100,8 @@ export const SignIn = async (req, res, next) => {
     })
     const UserUpdate = await UserModel.findOneAndUpdate({ EmaiL }, {
         token: Token,
-        is_Online: true,
         isDeleted: false,
+        Userstatus:SystemRoles.Online,
     }, {
         new: true
     })
@@ -108,6 +109,19 @@ export const SignIn = async (req, res, next) => {
 
 }
 
+//SignOut
+export const Signout=async (req, res, next) => {
+    const UserId = req.authUser._id
+    const User = await UserModel.findById({ _id: UserId })
+    if (!User) {
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    const softDelete = await UserModel.findByIdAndUpdate({ _id: UserId }, { Userstatus: SystemRoles.Offline })
+    res.status(200).json({ Message: "Profile Successfully soft Deleted" })
+
+
+
+}
 //UpdateProfile(Email,Phone)
 export const Update = async (req, res, next) => {
     const { Phone, Email } = req.body
@@ -216,12 +230,11 @@ export const SoftDelete = async (req, res, next) => {
 
 }
 
-
 //ForgetPass
 export const ForgetPassword=async (req,res,next)=>{
     const{Email}=req.body
     //Check if User Exists
-    const User= await UserModel.findOne(Email)
+    const User= await UserModel.findOne({Email})
     if(!User){
         return next (new Error ('Invalid Email',{cause:400}))
     }
@@ -258,7 +271,7 @@ export const ForgetPassword=async (req,res,next)=>{
         }, {
         new: true
     })
-    res.status(200).json({ Message: 'Done', UserUpdate, ResetPasswordLink })
+    res.status(200).json({ Message: 'Done', UserUpdate, ResetLink })
 }
 
 //Reset Password
@@ -270,8 +283,8 @@ export const resetPass=async (req,res,next)=>{
         signature:process.env.SIGNATURE_PASSWORD_RESET
     })
     const User = await UserModel.findOne({
-        Email: decoded?.Email,
-        Code: decoded?.Code
+        Email: DecodedData?.Email,
+        Code: DecodedData?.Code
     })
     if (!User) {
         return next(new Error('you already rest your password, try to login', { cause: 400 }))

@@ -35,6 +35,8 @@ router.patch('/ForgetPassword',asyncHandler(AuthControllers.ForgetPassword))
 //Reset Password
 router.patch('/reset/:Token',asyncHandler(AuthControllers.resetPass))
 
+//SignOut
+router.patch('/SignOut',isAuth(),asyncHandler(AuthControllers.Signout))
 
 
 //Add Profile pictureLocally
@@ -48,9 +50,5 @@ router.post('/coverLocally',isAuth(),multerFunction(allowedExtensions.Image, 'Us
     asyncHandler(AuthControllers.coverPictures),
 )
 
-//Forget Password
-
-
-//Reset Password
 
 export default router
