@@ -48,6 +48,7 @@ export const DeleteBook=async(req,res,next)=>{
 
 }
 
+<<<<<<< HEAD
 //GetAllBook
 
 export const GetAll=async(req,res,next)=>{
@@ -60,3 +61,5 @@ export const GetAll=async(req,res,next)=>{
 
 }
 
+=======
+>>>>>>> main
