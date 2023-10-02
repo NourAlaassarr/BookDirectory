@@ -13,6 +13,7 @@ export const InitiateApp=(App,express)=>{
     
     App.get('/',(req,res)=>res.send("Hello World!"))
     App.use('/Auth',Routers.AuthRoutes)
+    App.use('/Book',Routers.BookRoutes)
 
     App.use('/Uploads',express.static('./Uploads'))//Locally
     App.all('*',(req,res,next)=>res.status(404).json({message:'URL NOT FOUND.'}))

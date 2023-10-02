@@ -72,10 +72,6 @@ const UserSchema = new Schema({
         type:String,
         default:null
     },
-    is_Online:{
-        type:Boolean,
-        default:false,
-    },
     updatedAt:{
         type:Date
     },
@@ -88,7 +84,7 @@ const UserSchema = new Schema({
     BookShelf:[
         {
             BookId:{
-                type:Schema.ObjectId,
+                type:Schema.Types.ObjectId,
                 ref:'Book',
                 required:true,
             },
@@ -98,12 +94,18 @@ const UserSchema = new Schema({
             },
             status:{
                 type: String,
-                enum:['Read' , 'Currently-reading' , 'To-Read'],
-                default:'ToRead'
+                enum:['Read' , 'Currently_reading' , 'To_Read'],
+                default:'To_Read'
             
         },
     }
 ],
+Userstatus:{
+    type:String,
+    enum:[SystemRoles.Online,SystemRoles.Offline],
+    default:SystemRoles.Offline
+
+}
     
     // provider: {
     //     type: String,
