@@ -9,9 +9,6 @@ export const isAuth = (Role) => {
 
             if (!Token) {
                 return res.status(400).json({ message: 'No token provided.' })
-                if(!Role){
-                    Role=SystemRoles.User
-                }
             }
 
             try {

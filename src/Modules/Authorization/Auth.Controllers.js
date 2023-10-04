@@ -8,7 +8,7 @@ import { SystemRoles } from '../../utlis/SystemRoles.js'
 import cloudinary from '../../utlis/CloudinaryConfig.js'
 //SignUp
 export const SignUp = async (req, res, next) => {
-    const { Email, Password, ConfirmPassword, Gender, Address, Phone, UserName, FirstName, LastName } = req.body
+    const { Email, Password, ConfirmPassword, Gender, Address, Phone, UserName, FirstName, LastName,role } = req.body
 
     //check for duplication UserName/email
     const EmailCheck = await UserModel.findOne({ Emai: Email })
@@ -57,6 +57,7 @@ export const SignUp = async (req, res, next) => {
         Address,
         Phone,
         UserName,
+        role
 
 
     })
@@ -82,8 +83,9 @@ export const ConfirmEmail = async (req, res, next) => {
 
 //Sign in
 export const SignIn = async (req, res, next) => {
-    const { EmaiL, Password } = req.body
-    const Usercheck = await UserModel.findOne(EmaiL)
+    const { Email, Password } = req.body
+
+    const Usercheck = await UserModel.findOne({Email})
     if (!Usercheck) {
         return next(new Error('Invalid Credentials', { cause: 400 }))
     }
@@ -93,13 +95,13 @@ export const SignIn = async (req, res, next) => {
     }
     const Token = GenerateToken({
         payload: {
-            EmaiL: Usercheck.Email,
+            Email: Usercheck.Email,
             _id: Usercheck._id,
         },
         signature: process.env.SIGN_IN_TOKEN_SECRET,
         expiresIn: '1d'
     })
-    const UserUpdate = await UserModel.findOneAndUpdate({ EmaiL }, {
+    const UserUpdate = await UserModel.findOneAndUpdate({ Email }, {
         token: Token,
         isDeleted: false,
         Userstatus: SystemRoles.Online,
