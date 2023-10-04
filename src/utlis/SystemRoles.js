@@ -5,5 +5,8 @@ export const SystemRoles={
     Admin:'Admin',
     Super:'SuperAdmin',
     Online:'Online',
-    Offline:'Offline'
+    Offline:'Offline',
+    Read:'Read',
+    Currently_reading: 'Currently_reading' ,
+    To_Read:'To_Read',
 }

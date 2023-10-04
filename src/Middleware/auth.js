@@ -1,4 +1,5 @@
 import { UserModel } from "../../DB/Models/User.Model.js"
+import { SystemRoles } from "../utlis/SystemRoles.js"
 import { GenerateToken, VerifyToken } from "../utlis/TokenFunction.js"
 
 export const isAuth = (Role) => {
@@ -8,6 +9,9 @@ export const isAuth = (Role) => {
 
             if (!Token) {
                 return res.status(400).json({ message: 'No token provided.' })
+                if(!Role){
+                    Role=SystemRoles.User
+                }
             }
 
             try {
@@ -20,8 +24,9 @@ export const isAuth = (Role) => {
                     return res.status(400).json({ Message: 'Please Sign Up First!' })
                 }
                 if (!Role.includes(User.role)) {
-                    return next(new Error('unauthorized to acceess this api', { cause: 401 }))
+                    return next(new Error('Unauthorized to access this API'));
                 }
+                
                 req.authUser = User
                 next()
             }

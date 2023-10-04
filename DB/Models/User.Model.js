@@ -78,9 +78,12 @@ const UserSchema = new Schema({
     ChangePassAt:{
         type:Date
     },
-    ProfilePicture:String,
-    CoverPicture:[String],
+    ProfilePic:{
+        public_id:String,
+        secure_url:String
+    },
     
+    CustomId:String,
     BookShelf:[
         {
             BookId:{
@@ -94,8 +97,8 @@ const UserSchema = new Schema({
             },
             status:{
                 type: String,
-                enum:['Read' , 'Currently_reading' , 'To_Read'],
-                default:'To_Read'
+                enum:[SystemRoles.Read , SystemRoles.Currently_reading , SystemRoles.To_Read],
+                default:SystemRoles.To_Read
             
         },
     }

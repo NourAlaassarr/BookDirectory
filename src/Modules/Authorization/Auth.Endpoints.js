@@ -1,7 +1,8 @@
 import { SystemRoles } from "../../utlis/SystemRoles.js";
 
-export const UserApiRoles={
-    
+export const UserApi={
+    User_api:[SystemRoles.User],
+
 
     
 }

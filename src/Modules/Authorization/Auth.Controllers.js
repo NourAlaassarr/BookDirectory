@@ -5,6 +5,7 @@ import { sendmailService } from '../../Services/SendEmailService.js'
 import { emailTemplate } from '../../utlis/EmailTemplate.js'
 import { nanoid } from 'nanoid'
 import { SystemRoles } from '../../utlis/SystemRoles.js'
+import cloudinary from '../../utlis/CloudinaryConfig.js'
 //SignUp
 export const SignUp = async (req, res, next) => {
     const { Email, Password, ConfirmPassword, Gender, Address, Phone, UserName, FirstName, LastName } = req.body
@@ -101,7 +102,7 @@ export const SignIn = async (req, res, next) => {
     const UserUpdate = await UserModel.findOneAndUpdate({ EmaiL }, {
         token: Token,
         isDeleted: false,
-        Userstatus:SystemRoles.Online,
+        Userstatus: SystemRoles.Online,
     }, {
         new: true
     })
@@ -110,7 +111,7 @@ export const SignIn = async (req, res, next) => {
 }
 
 //SignOut
-export const Signout=async (req, res, next) => {
+export const Signout = async (req, res, next) => {
     const UserId = req.authUser._id
     const User = await UserModel.findById({ _id: UserId })
     if (!User) {
@@ -231,35 +232,35 @@ export const SoftDelete = async (req, res, next) => {
 }
 
 //ForgetPass
-export const ForgetPassword=async (req,res,next)=>{
-    const{Email}=req.body
+export const ForgetPassword = async (req, res, next) => {
+    const { Email } = req.body
     //Check if User Exists
-    const User= await UserModel.findOne({Email})
-    if(!User){
-        return next (new Error ('Invalid Email',{cause:400}))
+    const User = await UserModel.findOne({ Email })
+    if (!User) {
+        return next(new Error('Invalid Email', { cause: 400 }))
     }
     const Code = nanoid()
     const hashedCode = pkg.hashSync(Code, +process.env.SALT_ROUNDS)
 
     //----------------generate Token--------------------
-    const Token=GenerateToken({
-        payload:{
-            Email:Email,
-            _id:User._id,
-            Code:hashedCode,
+    const Token = GenerateToken({
+        payload: {
+            Email: Email,
+            _id: User._id,
+            Code: hashedCode,
         },
-        signature:process.env.SIGNATURE_PASSWORD_RESET,
-        expiresIn:'1h'
+        signature: process.env.SIGNATURE_PASSWORD_RESET,
+        expiresIn: '1h'
     })
     //-----------------Send Reset Email------------------------------
-    const ResetLink=`${req.protocol}://${req.headers.host}/Auth/reset/${Token}`
-    const sendEmail=sendmailService({
-        to:Email,
-        subject:'Reset Password',
-        Message:emailTemplate({
-            link:ResetLink,
-            linkData:'Click here to Reset Password',
-            subject:'Password Reset'
+    const ResetLink = `${req.protocol}://${req.headers.host}/Auth/reset/${Token}`
+    const sendEmail = sendmailService({
+        to: Email,
+        subject: 'Reset Password',
+        Message: emailTemplate({
+            link: ResetLink,
+            linkData: 'Click here to Reset Password',
+            subject: 'Password Reset'
         })
     })
     if (!sendEmail) {
@@ -275,12 +276,12 @@ export const ForgetPassword=async (req,res,next)=>{
 }
 
 //Reset Password
-export const resetPass=async (req,res,next)=>{
-    const{Token}=req.params
+export const resetPass = async (req, res, next) => {
+    const { Token } = req.params
     const { NewPassword } = req.body
-    const DecodedData=VerifyToken({
-        token:Token,
-        signature:process.env.SIGNATURE_PASSWORD_RESET
+    const DecodedData = VerifyToken({
+        token: Token,
+        signature: process.env.SIGNATURE_PASSWORD_RESET
     })
     const User = await UserModel.findOne({
         Email: DecodedData?.Email,
@@ -296,7 +297,72 @@ export const resetPass=async (req,res,next)=>{
     res.status(200).json({ Message: 'Done', ResetPassword })
 }
 
+//AddProfilePicture cloud
+export const AddProfilePicture = async (req, res, next) => {
+    const UserId = req.authUser._id
+    if (!req.file) {
+        return next(new Error('please upload your profile picture'))
+    }
+    const CustomId=nanoid()
+    const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
+        folder: `${process.env.PROJECT_FOLDER}/Users/Profiles/${CustomId}`,
+        resource_type: 'image'
+    })
 
+    const User = await UserModel.findByIdAndUpdate({ _id: UserId }, { ProfilePic: { public_id, secure_url },CustomId:CustomId }, { new: true })
+    if (!User) {
+        await cloudinary.uploader.destroy(public_id)
+    }
+    res.json({ message: 'done', User })
+}
+
+//AddCoverPicture cloud
+// export const CoverCloud = async (req, res, next) => {
+//     const UserId = req.authUser._id
+//     if (!req.file) {
+//         return next(new Error('please upload your cover pictures'))
+//     }
+//     const coverImages = []
+//     for (const file in req.files) {
+//         for (const key of req.files[file]) {
+//             const { secure_url, public_id } = await cloudinary.uploader.upload(
+//                 key.path,
+//                 {
+//                     folder: `Users/Covers/${UserId}`,
+//                     resource_type: 'image',
+//                 },
+//             )
+//             coverImages.push({ secure_url, public_id })
+//         }
+//     }
+//     const user = await UserModel.findById(UserId)
+
+//     user.CoverPic.length
+//         ? coverImages.push(...user.CoverPic)
+//         : coverImages
+
+//     const userNew = await UserModel.findByIdAndUpdate(
+//         {_id:UserId},
+//         {
+//             CoverPic: coverImages,
+//         },
+//         {
+//             new: true,
+//         },
+//     )
+//     res.status(200).json({ message: 'Done', userNew })
+// }
+
+export const deleteuser = async(req,res,next)=>{
+    const UserId = req.authUser._id
+    const User = await UserModel.findById({ _id: UserId })
+    if (!User) {
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    await cloudinary.api.delete_resources_by_prefix(`${process.env.PROJECT_FOLDER}/Users/Profiles/${User.CustomId}`)
+    await cloudinary.api.delete_folder(`${process.env.PROJECT_FOLDER}/Users/Profiles/${User.CustomId}`)
+    res.json({ message: 'Deleted' })
+}
 //Add Profile Picture Locally
 export const AddProfilePictureLocally = async (req, res, next) => {
     const UserId = req.authUser._id
@@ -309,38 +375,38 @@ export const AddProfilePictureLocally = async (req, res, next) => {
 }
 
 //CoverImage Locally
-export const CoverPictureLocally = async (req, res, next) => {
-    const UserId = req.authUser._id
-    if (!req.file) {
-        return next(new Error('please upload your profile picture'))
-    }
-    const coverImages = []
-    // for (const file of req.files){CoverImage.push(file.path)} //array
-    
-    for (const file in req.files) {
-        console.log(file) // image , cover
-        // console.log(req.files[file])
-        for (const key of req.files[file]) {
-            console.log(key)
-            coverImages.push(key.path)
-        }
-    }
-    const user = await UserModel.findById(_id)
+// export const CoverPictureLocally = async (req, res, next) => {
+//     const UserId = req.authUser._id
+//     if (!req.file) {
+//         return next(new Error('please upload your profile picture'))
+//     }
+//     const coverImages = []
+//     // for (const file of req.files){CoverImage.push(file.path)} //array
 
-    user.CoverPicture.length
-        ? coverImages.push(...user.CoverPicture)
-        : coverImages
+//     for (const file in req.files) {
+//         console.log(file) // image , cover
+//         // console.log(req.files[file])
+//         for (const key of req.files[file]) {
+//             console.log(key)
+//             coverImages.push(key.path)
+//         }
+//     }
+//     const user = await UserModel.findById(_id)
 
-    const userNew = await UserModel.findByIdAndUpdate(
-        { _id: UserId},
-        {
-            CoverPicture: coverImages,
-        },
-        {
-            new: true,
-        },
-    )
-    res.status(200).json({ message: 'Done', userNew })
-}
+//     user.CoverPicture.length
+//         ? coverImages.push(...user.CoverPicture)
+//         : coverImages
+
+//     const userNew = await UserModel.findByIdAndUpdate(
+//         { _id: UserId },
+//         {
+//             CoverPicture: coverImages,
+//         },
+//         {
+//             new: true,
+//         },
+//     )
+//     res.status(200).json({ message: 'Done', userNew })
+// }
 
 
