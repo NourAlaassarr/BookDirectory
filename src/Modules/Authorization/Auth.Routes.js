@@ -31,7 +31,6 @@ router.get('/GetProfile', isAuth(UserApi.User_api), asyncHandler(AuthControllers
 router.patch('/SoftDelete', isAuth(UserApi.User_api), asyncHandler(AuthControllers.SoftDelete))
 
 //Forget Password
-
 router.patch('/ForgetPassword',asyncHandler(AuthControllers.ForgetPassword))
 
 //Reset Password
@@ -61,12 +60,14 @@ router.post('/AddProfilePic',isAuth(UserApi.User_api),multerCloudFunction(allowe
 router.post('/AddProfilePicLocally', isAuth(UserApi.User_api),multerFunction(allowedExtensions.Image, 'User/Profile').single('profile'), asyncHandler(AuthControllers.AddProfilePictureLocally))
 
 //Add Cover PictureLocally
-// router.post('/coverLocally',isAuth(UserApi.User_api),multerFunction(allowedExtensions.Image, 'User/Covers').fields([
-//         { name: 'cover', maxCount: 1 },
-//         { name: 'image', maxCount: 2 },
-//     ]),
-//     asyncHandler(AuthControllers.coverPictures),
-// )
+router.post('/coverLocally',isAuth(UserApi.User_api),multerFunction(allowedExtensions.Image, 'User/Covers').fields([
+        { name: 'cover', maxCount: 1 },
+        { name: 'image', maxCount: 2 },
+    ]),
+    asyncHandler(AuthControllers.coverPictures),
+)
 
+//ADD Book to BookShelf
+router.post('/AddToShelf',isAuth(UserApi.User_api),asyncHandler(AuthControllers.AddToBookShelf))
 
 export default router

@@ -6,9 +6,10 @@ import { emailTemplate } from '../../utlis/EmailTemplate.js'
 import { nanoid } from 'nanoid'
 import { SystemRoles } from '../../utlis/SystemRoles.js'
 import cloudinary from '../../utlis/CloudinaryConfig.js'
+import { BookModel } from '../../../DB/Models/Books.Model.js'
 //SignUp
 export const SignUp = async (req, res, next) => {
-    const { Email, Password, ConfirmPassword, Gender, Address, Phone, UserName, FirstName, LastName,role } = req.body
+    const { Email, Password, ConfirmPassword, Gender, Address, Phone, UserName, FirstName, LastName, role } = req.body
 
     //check for duplication UserName/email
     const EmailCheck = await UserModel.findOne({ Emai: Email })
@@ -85,7 +86,7 @@ export const ConfirmEmail = async (req, res, next) => {
 export const SignIn = async (req, res, next) => {
     const { Email, Password } = req.body
 
-    const Usercheck = await UserModel.findOne({Email})
+    const Usercheck = await UserModel.findOne({ Email })
     if (!Usercheck) {
         return next(new Error('Invalid Credentials', { cause: 400 }))
     }
@@ -309,17 +310,48 @@ export const AddProfilePicture = async (req, res, next) => {
     if (!req.file) {
         return next(new Error('please upload your profile picture'))
     }
-    const CustomId=nanoid()
+    const CustomId = nanoid()
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
         folder: `${process.env.PROJECT_FOLDER}/Users/Profiles/${CustomId}`,
         resource_type: 'image'
     })
 
-    const User = await UserModel.findByIdAndUpdate({ _id: UserId }, { ProfilePic: { public_id, secure_url },CustomId:CustomId }, { new: true })
+    const User = await UserModel.findByIdAndUpdate({ _id: UserId }, { ProfilePic: { public_id, secure_url }, CustomId: CustomId }, { new: true })
     if (!User) {
         await cloudinary.uploader.destroy(public_id)
     }
     res.status(200).json({ message: 'done', User })
+}
+//Add to BookShelf
+export const AddToBookShelf = async (req, res, next) => {
+    const UserId = req.authUser._id
+    const { BookId } = req.query
+    const { status } = req.body
+    const UserExist = await UserModel.findById({ _id: UserId })
+    if (!UserExist) {
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
+    const BookExist = await BookModel.findOne({ _id: BookId, IsDeleted: false })
+    if (!BookExist) {
+        return next(new Error('doesn\'t exist', { cause: 400 }))
+    }
+
+    const bookInShelf = UserExist.BookShelf.find(item => item.BookId.toString() === BookId.toString());
+
+    if (bookInShelf) {
+        next(new Error('Book already in BookShelf', { cause: 400 }))
+    }
+    // Add the book to the BookShelf
+    const updatedUser = await UserModel.findOneAndUpdate(
+        { _id: UserId },
+        { $push: { BookShelf: { BookId, status } } },
+        { new: true }  
+    );
+    
+    // UserExist.BookShelf.push({ BookId, status });
+    // await UserExist.save();
+
+    res.status(200).json({ Message: 'Added to Shelf', updatedUser });
 }
 
 //AddCoverPicture cloud
@@ -359,7 +391,9 @@ export const AddProfilePicture = async (req, res, next) => {
 //     res.status(200).json({ message: 'Done', userNew })
 // }
 
-export const deleteuser = async(req,res,next)=>{
+
+//delete user
+export const deleteuser = async (req, res, next) => {
     const UserId = req.authUser._id
     const User = await UserModel.findById({ _id: UserId })
     if (!User) {

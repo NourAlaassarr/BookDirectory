@@ -93,7 +93,6 @@ const UserSchema = new Schema({
             },
             name:{
                 type:String,
-                required:true,
             },
             status:{
                 type: String,
@@ -103,6 +102,7 @@ const UserSchema = new Schema({
         },
     }
 ],
+
 Userstatus:{
     type:String,
     enum:[SystemRoles.Online,SystemRoles.Offline],

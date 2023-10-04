@@ -29,7 +29,7 @@ const BookSchema = new Schema({
         GenreID:{
         type:Schema.Types.ObjectId,
         ref:'Genre',
-        // required:true,
+        //TODO: required:true,
 
         },
         Images: [
@@ -80,6 +80,8 @@ const BookSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'User',
         },
+
+        //msh 3rfa
         Likes:[{
             type:Schema.Types.ObjectId,
             ref:'User',
@@ -90,6 +92,7 @@ const BookSchema = new Schema({
             ref:'Comment',
     
         }],
+        
 
 })
 export const BookModel = model('Book',BookSchema)
