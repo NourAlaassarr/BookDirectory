@@ -2,6 +2,7 @@ import { DBConnection } from "../../DB/Connection.js"
 import cors from 'cors'
 import * as Routers from'../Modules/index.routes.js'
 import { GlobalResponse } from "./ErrorHandling.js"
+import router from "../Modules/Author/Author.routes.js"
 
 
 export const InitiateApp=(App,express)=>{
@@ -16,6 +17,7 @@ export const InitiateApp=(App,express)=>{
     App.use('/Book',Routers.BookRoutes)
     App.use('/Comment',Routers.CommentsRoutes)
     App.use('/Review',Routers.ReviewRoutes)
+    App.use('/Author',Routers.AuthRoutes)
 
     App.use('/Uploads',express.static('./Uploads'))//Locally
     App.all('*',(req,res,next)=>res.status(404).json({message:'URL NOT FOUND.'}))
