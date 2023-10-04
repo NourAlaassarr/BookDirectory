@@ -40,10 +40,12 @@ export const DeleteBook=async(req,res,next)=>{
     if(!User){
         return next(new Error('Invalid credentials', { cause: 400 }))
     }
-    const Bookexist=await BookModel.findOneAndDelete({_id:BookId,createdBy:UserId})
+    const Bookexist=await BookModel.findOne({_id:BookId,createdBy:UserId})
     if(!Bookexist){
         return next(new Error('Book doesn\'t exist', { cause: 400 }))
     }
+    Bookexist.IsDeleted=true
+    Bookexist.save()
     res.status(202).json({ Message: 'Successfully Delete', Bookexist})
 
 }

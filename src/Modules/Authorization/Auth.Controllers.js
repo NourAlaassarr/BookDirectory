@@ -250,7 +250,7 @@ export const ForgetPassword = async (req, res, next) => {
             Code: hashedCode,
         },
         signature: process.env.SIGNATURE_PASSWORD_RESET,
-        expiresIn: '1h'
+        expiresIn: '2m'
     })
     //-----------------Send Reset Email------------------------------
     const ResetLink = `${req.protocol}://${req.headers.host}/Auth/reset/${Token}`
@@ -300,6 +300,10 @@ export const resetPass = async (req, res, next) => {
 //AddProfilePicture cloud
 export const AddProfilePicture = async (req, res, next) => {
     const UserId = req.authUser._id
+    const UserExist = await UserModel.findById({ _id: UserId })
+    if (!UserExist) {
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
     if (!req.file) {
         return next(new Error('please upload your profile picture'))
     }
@@ -313,7 +317,7 @@ export const AddProfilePicture = async (req, res, next) => {
     if (!User) {
         await cloudinary.uploader.destroy(public_id)
     }
-    res.json({ message: 'done', User })
+    res.status(200).json({ message: 'done', User })
 }
 
 //AddCoverPicture cloud

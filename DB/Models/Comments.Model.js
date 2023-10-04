@@ -12,10 +12,12 @@ const CommentSchema = new Schema({
     CreatedBy:{
         type:Schema.Types.ObjectId,
         ref:'User',
+        required:true
     },
     BookId:{
         type:Schema.Types.ObjectId,
         ref:'Book',
+        required:true
     },
     Replies:[{
         type:Schema.Types.ObjectId,
@@ -27,6 +29,7 @@ const CommentSchema = new Schema({
         ref:'User',
 
     }],
+
     CustomId: String,
 
 

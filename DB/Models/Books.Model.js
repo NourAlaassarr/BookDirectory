@@ -44,6 +44,10 @@ const BookSchema = new Schema({
             },
             },
         ],
+        IsDeleted:{
+            type:Boolean,
+            default:false,
+        },
         
         price:{
             type:Number,
@@ -76,6 +80,16 @@ const BookSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'User',
         },
+        Likes:[{
+            type:Schema.Types.ObjectId,
+            ref:'User',
+    
+        }],
+        Comments:[{
+            type:Schema.Types.ObjectId,
+            ref:'Comment',
+    
+        }],
 
 })
 export const BookModel = model('Book',BookSchema)
