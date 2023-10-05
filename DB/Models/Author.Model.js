@@ -8,20 +8,34 @@ const AuthorSchema = new Schema({
         required: true,
         unique: true
     },
-    Age:Number,
-    Nationality:{
+    Age: Number,
+    Nationality: {
         type: String,
     },
-    CustomId: String,
-    Books:[{
-        BookId:{
-            type:Schema.Types.ObjectId,
-            ref:'Book'
+    Gender:{
+        type:String,
+        lowercase:true,
+        enum:['female','male','not specified'],
+        default:'not specified',
         },
-    }]
+    Pic: {
+        public_id: String,
+        secure_url: String
+    },
+    CustomId: String,
+
+}, { timestamps: true ,
+    toObject:{virtuals:true},
+    toJSON:{virtuals:true},
+})
+
+AuthorSchema.virtual('Books',{
+    foreignField:'AuthorId',
+    localField:'_id',
+    ref:'Book'
+})
 
 
-},{timestamps:true})
 export const AuthorModel = model('Author', AuthorSchema)
 
 

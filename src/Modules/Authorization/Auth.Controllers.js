@@ -401,7 +401,7 @@ export const deleteuser = async (req, res, next) => {
     }
     await cloudinary.api.delete_resources_by_prefix(`${process.env.PROJECT_FOLDER}/Users/Profiles/${User.CustomId}`)
     await cloudinary.api.delete_folder(`${process.env.PROJECT_FOLDER}/Users/Profiles/${User.CustomId}`)
-    res.json({ message: 'Deleted' })
+    res.status(200).json({ message: 'Deleted' })
 }
 //Add Profile Picture Locally
 export const AddProfilePictureLocally = async (req, res, next) => {

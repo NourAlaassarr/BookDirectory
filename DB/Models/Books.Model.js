@@ -17,7 +17,8 @@ const BookSchema = new Schema({
     published_Date:Date,
     AuthorId:{
         type:Schema.Types.ObjectId,
-        ref:'Author'
+        ref:'Author',
+        required:true,
     },
     BookState:[{
         Average_Rating:Number,

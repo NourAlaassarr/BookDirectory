@@ -10,12 +10,16 @@ import {UserApi}from'./Author.ApiEndpoints.js'
 const router = Router()
 
 
-//TODO: add Author
+//add Author
+router.post('/Add',isAuth(UserApi.Admin),multerCloudFunction(allowedExtensions.Image).single('Pic'),asyncHandler(AuthorControllers.addAuthor))
 
-//TODO:delete Author
+//:delete Author
+router.delete('/Delete',isAuth(UserApi.Admin),asyncHandler(AuthorControllers.DeleteAuthor))
 
-//TODO:Get Author with all his works details
 
-//TODO:Update Author
+//Get Author with all his works details
+router.get('/GetAll',asyncHandler(AuthorControllers.GetAll))
 
+//Update Author
+router.put('/Update',isAuth(UserApi.Admin),multerCloudFunction(allowedExtensions.Image).single('Pic'),asyncHandler(AuthorControllers.Update))
 export default router
