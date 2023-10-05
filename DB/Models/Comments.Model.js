@@ -29,6 +29,9 @@ const CommentSchema = new Schema({
         ref:'User',
 
     }],
+    isDeleted:{type:Boolean,
+        default:false
+    },
 
     CustomId: String,
 

@@ -19,6 +19,7 @@ const ReviewSchema = new Schema({
         max: 5,
         enum: [1, 2, 3, 4, 5]
     },
+    Number_reviews:Number
 
 }, {
     timestamps: true,

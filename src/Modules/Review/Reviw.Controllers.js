@@ -10,7 +10,10 @@ export const AddReview = async (req,res,next)=>{
 const UserId=req.authUser._id
 const{BookId}=req.query
 const {ReviewRate}= req.body
-
+const User = await UserModel.findById({ _id: UserId, IsDeleted: false })
+    if (!User) {
+        return next(new Error('Invalid credentials', { cause: 400 }))
+    }
 //check Book
 const IsvalidBook = await UserModel.findOne({_id: UserId,
     'BookShelf.BookId':BookId,
@@ -29,11 +32,22 @@ const existingReview = await ReviewModel.findOne({
 if (existingReview) {
     return next(new Error('You have already submitted a review for this book', { cause: 400 }));
 }
+const updatedReview = await ReviewModel.findOneAndUpdate(
+    { BookId },
+    { $inc: { Number_reviews: 1 } },
+    { new: true }
+);
+
+if (!updatedReview) {
+    return next(new Error('Failed to increment Number_reviews', { status: 400 }));
+}
+
 
 const ReviewObject=new ReviewModel({
     ReviewRate,
     UserId,
     BookId,
+    Number_reviews:Number_reviews,
     
 })
 const ReviewDb= await ReviewObject.save()
@@ -52,21 +66,14 @@ for (const review of Reviews) {
 
 const averageRating = Reviews.length > 0 ? sumOfRates / Reviews.length : 0;
 
-// Update book's average rating
-const book = await BookModel.findById(BookId);
-book.BookState.Average_Rating = averageRating;
-await book.save();
+// Update book's average rating in BookState
+Book.BookState.Average_Rating = averageRating;
+Book.BookState.Number_reviews=Number_reviews
 
-// const Reviews= await ReviewModel.find({BookId})
+// Save the updated book
+const updatedBook = await Book.save();
 
-// let sumOfRates=0
-// for(const review of Reviews)
-// {
-//     sumOfRates+=review.ReviewRate
-// }
-// Book.BookState.Average_Rating=sumOfRates/Reviews.length
-// await Book.save()
-res.status(201).json({Message:"done",book})
+res.status(201).json({ Message: 'done', book: updatedBook });
 }
 
 
