@@ -36,5 +36,5 @@ const CommentSchema = new Schema({
     CustomId: String,
 
 
-})
+},{timestamps:true})
 export const CommentModel = model('Comment', CommentSchema)

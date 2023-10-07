@@ -9,4 +9,6 @@ export const SystemRoles={
     Read:'Read',
     Currently_reading: 'Currently_reading' ,
     To_Read:'To_Read',
+    Expired:'Expired',
+    Valid:'Valid'
 }

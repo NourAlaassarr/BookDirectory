@@ -13,5 +13,5 @@ const GenresSchema = new Schema({
 
 
 
-})
+},{timestamps:true})
 export const GenreModel = model('Genre', GenresSchema)

@@ -1,5 +1,3 @@
-
-
 import{model,Schema}from'mongoose'
 
 const ReplySchema = new Schema({
@@ -23,11 +21,11 @@ const ReplySchema = new Schema({
         ref:'Comment',
         required:true
     },
-    Replies:[{
-        type:Schema.Types.ObjectId,
-        ref:'Reply',
+    // Replies:[{
+    //     type:Schema.Types.ObjectId,
+    //     ref:'Reply',
 
-    }],
+    // }],
     isDeleted:{type:Boolean,
         default:false
     },
@@ -35,5 +33,5 @@ const ReplySchema = new Schema({
     CustomId: String,
 
 
-})
+},{timestamps:true})
 export const ReplyModel = model('Reply', ReplySchema)

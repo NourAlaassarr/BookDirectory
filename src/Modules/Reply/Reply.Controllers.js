@@ -48,7 +48,7 @@ export const DeleteReply = async (req, res, next) => {
 }
 
 //UpdateComment
-export const UpdateComment = async (req, res, next) => {
+export const UpdateReply = async (req, res, next) => {
     const UserId = req.authUser._id
     const { CommentId, BookId,ReplyId } = req.query
     const { ReplyBody } = req.body

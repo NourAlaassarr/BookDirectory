@@ -81,7 +81,6 @@ const BookSchema = new Schema({
         ref: 'User',
     },
 
-    //msh 3rfa
     Likes: [{
         type: Schema.Types.ObjectId,
         ref: 'User',
