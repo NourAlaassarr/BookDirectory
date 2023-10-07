@@ -29,7 +29,7 @@ const BookSchema = new Schema({
     GenreID: {
         type: Schema.Types.ObjectId,
         ref: 'Genre',
-        // required:true,
+        required:true,
 
     },
     Images: [
