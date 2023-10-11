@@ -1,7 +1,8 @@
 import { BookModel } from '../../../DB/Models/Books.Model.js'
 import { UserModel } from '../../../DB/Models/User.Model.js'
 import { AuthorModel } from '../../../DB/Models/Author.Model.js'
-
+import {PaginationFunction}from'../../utlis/PaginationFunction.js'
+import{ApiFeature}from'../../utlis/apiFeatures.js'
 //Add Book 
 export const Add_Book = async (req, res, next) => {
     const UserId = req.authUser._id
@@ -58,35 +59,55 @@ export const DeleteBook = async (req, res, next) => {
 
 }
 
-//GetAllBook TODO:pagination
-
+// GetAllBook and filtering sorting selecting 
 export const GetAll = async (req, res, next) => {
-    const Boosk = await BookModel.find().populate({
-        path: 'createdBy',
-        select: "UserName"
-    })
 
-    res.status(202).json({ Message: 'done ', Boosk })
-
-}
-
-//get book with comments and replies 
-export const GetAllWithComments = async (req, res, next) => {
-    const { BookId } = req.query
-    const Bookexist = await BookModel.findOne({ _id: BookId })
-    if (!Bookexist) {
-        return next(new Error('Book doesn\'t exist', { cause: 400 }))
-    }
-    const Book = await BookModel.find().populate({
-        path: 'GetComments',
-    })
+    const APiFeatureInstance = new ApiFeature( BookModel.find({}),req.query).sort().filter().pagination().select()
+    const Book = await APiFeatureInstance.mongooseQuery
 
     res.status(202).json({ Message: 'done ', Book })
 
 }
+export const GetByName=async (req, res, next) => {
+    const{Name,page,size}=req.query
+    const{limit,skip}= PaginationFunction({page,size})
+    
+    const books = await BookModel.find({
+        $or:[
+            {Name:{$regex:Name,$options:'i'}},
+        ],
+    }).limit(limit).skip(skip)
+    res.status(202).json({ Message: 'done ', books })
+    }
+    
+    //get book with comments and replies 
+    export const GetAllWithComments = async (req, res, next) => {
+        const { BookId } = req.query
+        const Bookexist = await BookModel.findOne({ _id: BookId })
+        if (!Bookexist) {
+            return next(new Error('Book doesn\'t exist', { cause: 400 }))
+        }
+        const Book = await BookModel.find().populate({
+            path: 'GetComments',
+        })
+    
+        res.status(202).json({ Message: 'done ', Book })
+    
+    }
+// //GetAllBook 
 
-//LikeBook
+// export const GetAll = async (req, res, next) => {
+//     const Boosk = await BookModel.find().populate({
+//         path: 'createdBy',
+//         select: "UserName"
+//     })
+
+//     res.status(202).json({ Message: 'done ', Boosk })
+
+// }
+
+//find by Name
 
 
-//UnlikeBook
+
 
