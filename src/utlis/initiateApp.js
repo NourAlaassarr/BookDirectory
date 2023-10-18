@@ -18,6 +18,7 @@ export const InitiateApp=(App,express)=>{
     App.use('/Comment',Routers.CommentsRoutes)
     App.use('/Review',Routers.ReviewRoutes)
     App.use('/Author',Routers.AuthorRoutes)
+    App.use('/Cart',Routers.CartRoutes)
 
     App.use('/Uploads',express.static('./Uploads'))//Locally
     App.all('*',(req,res,next)=>res.status(404).json({message:'URL NOT FOUND.'}))
