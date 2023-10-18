@@ -1,3 +1,4 @@
+
 import { model, Schema, SchemaType } from "mongoose";
 
 const BookSchema = new Schema({
@@ -91,6 +92,7 @@ const BookSchema = new Schema({
         ref: 'Comment',
 
     }],
+    CustomId:String
 
 
 }, {

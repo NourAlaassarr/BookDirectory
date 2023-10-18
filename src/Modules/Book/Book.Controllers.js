@@ -3,10 +3,11 @@ import { UserModel } from '../../../DB/Models/User.Model.js'
 import { AuthorModel } from '../../../DB/Models/Author.Model.js'
 import {PaginationFunction}from'../../utlis/PaginationFunction.js'
 import{ApiFeature}from'../../utlis/apiFeatures.js'
+import { nanoid } from 'nanoid'
 //Add Book 
 export const Add_Book = async (req, res, next) => {
     const UserId = req.authUser._id
-    const { AuthorId } = req.query
+    const { AuthorId, GenreID} = req.query
     const { Name,
         Language,
         BookEdition,
@@ -32,9 +33,17 @@ const Bookexist = await BookModel.findOne({ Name })
 if (Bookexist) {
     return next(new Error('Book is Already Exsit', { cause: 400 }))
 }
+//Todo: Add imgs
+
+const PricefterDiscount = price * (1 - (AppliedDiscount || 0) / 100)
+if(!req.files){
+    return next(new Error('Please Upload Book Pictures',{cause:400}))
+}
+const CustomId=nanoid()
+
 const bookObject = new BookModel({
-    Name, Language, BookEdition, NumberOfPages, Description, price, AppliedDiscount, PriceAfterDiscount, stock,
-    createdBy: User._id,AuthorId,
+    Name, Language, BookEdition, NumberOfPages, Description, price, AppliedDiscount, PriceAfterDiscount:PricefterDiscount, stock,
+    createdBy: User._id,AuthorId,GenreID,CustomId
 })
 const bookfinal = await bookObject.save()
 res.status(202).json({ Message: 'successfully Added', bookfinal })

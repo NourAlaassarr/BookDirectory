@@ -3,7 +3,7 @@ import cors from 'cors'
 import * as Routers from'../Modules/index.routes.js'
 import { GlobalResponse } from "./ErrorHandling.js"
 import router from "../Modules/Author/Author.routes.js"
-
+import {ChangeCouponStatus}from'./CronJob.js'
 
 export const InitiateApp=(App,express)=>{
     const Port=process.env.PORT ||5000
@@ -23,6 +23,7 @@ export const InitiateApp=(App,express)=>{
     App.all('*',(req,res,next)=>res.status(404).json({message:'URL NOT FOUND.'}))
     
     App.use(GlobalResponse)
+    ChangeCouponStatus()
     App.listen(Port,()=>{
         console.log(`---------------Server is Running on port number ${Port} !---------------`)
     })
